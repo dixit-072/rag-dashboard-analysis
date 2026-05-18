@@ -55,3 +55,51 @@ This project transforms raw chatbot logs into actionable operational intelligenc
        ▼                      ▼
 [ Streamlit App ]      [ Power BI Dashboard ]
    (app.py)             (Rag Dashboard.pbix)
+
+---
+
+## 📊 Core Metrics Tracked
+
+* **Query Analytics:** Active trend monitoring of unique incoming volume over time.
+* **Retrieval Success Rate:** Accuracy checking based on successful vs. fallback system triggers.
+* **Confidence Distribution:** Statistical average modeling of how confident the AI felt across category topics.
+* **Response Faithfulness Evaluation:** Verifying how closely generated text matches technical document inputs.
+
+## ⚡ Engineering Challenges Solved
+
+* **Schema Alignment:** Automated structure standardization across mismatched raw CSV log files.
+* **Nested Metadata Extraction:** Parsing unstructured context blocks to evaluate underlying chunk characters.
+* **Dynamic Fallback Detection:** Pattern-matching algorithms that automatically catch and categorize system failures.
+
+---
+
+## 🛠️ Tech Stack & Tools
+
+* **Language:** Python
+* **Data Engineering:** Pandas, NumPy
+* **Database Pipeline:** MySQL Server, SQLAlchemy Engine, MySQL-Connector
+* **UI & Visualizations:** Streamlit Cloud, Plotly Express
+* **Business Intelligence:** Power BI Desktop (Star Schema Data Model)
+* **Environment Security:** Python-Dotenv
+
+## ⚙️ Local Setup & Installation
+
+1. Clone the Repository
+
+```bash
+git clone https://github.com/dixit-072/rag-dashboard-analysis.git
+cd rag-dashboard-analysis
+```
+
+2. Install Required Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Launch the Local Dashboard
+
+```bash
+streamlit run app.py
+```
+  
