@@ -11,6 +11,13 @@ This project processes raw LLM/chatbot logs, engineers operational performance m
 
 ---
 
+## 🖥️ Dashboard Analytics Preview
+
+### 🎨 Power BI Visual Canvas Layout:
+![Power BI Dashboard Overview](rag_dashboard.png)
+
+---
+
 ## 🎯 Problem Statement
 
 Modern RAG systems generate large volumes of operational logs, but most AI applications lack centralized observability tooling to monitor system health. Key challenges include:
