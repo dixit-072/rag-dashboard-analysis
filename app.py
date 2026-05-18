@@ -11,20 +11,32 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 st.set_page_config(page_title="RAG System Analytics", page_icon="🚀", layout="wide")
 
 # 2. Database Connection Wrapper
-@st.cache_data # Keeps the app lightning-fast by caching the database data
+@st.cache_data
 def load_data_from_mysql():
+    # 1. First, check if a secure cloud environment password exists
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
     database = os.getenv("DB_NAME")
+    
+    # 2. Hybrid Routing Strategy
+    if not user or host == "localhost":
+        try:
+            # Look inside your root project folder for the compiled dataset
+            df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'outputs', 'RAG_Performance_Analysis_Final.csv'))
+            return df
+        except Exception as csv_err:
+            st.error(f"Backup dataset load failed: {csv_err}")
+            return None
+            
+    # 3. Otherwise, connect to a live cloud database engine
     try:
         engine = create_engine(f'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}')
-        # Pull the exploded evaluation master table we engineered
         df = pd.read_sql_table('power_bi', con=engine)
         return df
     except Exception as e:
-        st.error(f" Could not connect to MySQL: {e}")
+        st.error(f"Could not connect to MySQL Server: {e}")
         return None
 
 # Load the data from your local SQL server
