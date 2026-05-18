@@ -13,24 +13,21 @@ st.set_page_config(page_title="RAG System Analytics", page_icon="🚀", layout="
 # 2. Database Connection Wrapper
 @st.cache_data
 def load_data_from_mysql():
-    # 1. First, check if a secure cloud environment password exists
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
     database = os.getenv("DB_NAME")
     
-    # 2. Hybrid Routing Strategy
+    # Hybrid Routing Strategy
     if not user or host == "localhost":
         try:
-            # Look inside your root project folder for the compiled dataset
             df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'outputs', 'RAG_Performance_Analysis_Final.csv'))
             return df
         except Exception as csv_err:
             st.error(f"Backup dataset load failed: {csv_err}")
             return None
             
-    # 3. Otherwise, connect to a live cloud database engine
     try:
         engine = create_engine(f'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}')
         df = pd.read_sql_table('power_bi', con=engine)
@@ -39,7 +36,7 @@ def load_data_from_mysql():
         st.error(f"Could not connect to MySQL Server: {e}")
         return None
 
-# Load the data from your local SQL server
+# Load the data
 df = load_data_from_mysql()
 
 if df is not None:
@@ -49,14 +46,11 @@ if df is not None:
     st.write("---")
 
     # 4. High-Level KPI Summary Cards 
-    # Group by the actual clean query text to get accurate unique question tracking
     unique_df = df.drop_duplicates(subset=['final_query_clean'])
     
     total_queries = unique_df['final_query_clean'].nunique()
     avg_confidence = unique_df['confidence_score'].mean()
     fallback_rate = unique_df['is_fallback'].mean()
-    
-    # Calculate RAG Accuracy Rate (100% minus the fallback rate)
     rag_accuracy = 1.0 - fallback_rate
 
     kpi1, kpi2, kpi3 = st.columns(3)
@@ -69,13 +63,10 @@ if df is not None:
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
-        st.subheader(" Reliability Baseline (Success vs Fallback)")
-        
-        # Foolproof approach: Create a temporary display column to avoid mapping errors
+        st.subheader("Reliability Baseline (Success vs Fallback)")
         plot_df = unique_df.copy()
         plot_df['Status'] = plot_df['is_fallback'].apply(lambda x: 'Fallback (Failure)' if x == True or str(x).lower() == 'true' else 'Success (True)')
         
-        # Let Plotly handle the counting automatically
         fig_pie = px.pie(
             plot_df, 
             names='Status', 
@@ -83,36 +74,56 @@ if df is not None:
             color_discrete_map={'Success (True)': '#2E5A88', 'Fallback (Failure)': '#E63946'},
             hole=0.4
         )
-        
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with chart_col2:
         st.subheader("Average AI Honesty by Document Source")
-        # Bar chart tracking chunk faithfulness across knowledge bases
-        source_faith = df.groupby('source_type')['chunk_faithfulness'].mean().reset_index()
-        fig_bar = px.bar(source_faith, x='source_type', y='chunk_faithfulness',
-                         labels={'source_type': 'Source Category', 'chunk_faithfulness': 'Avg Faithfulness (0-1)'},
-                         color='source_type', color_discrete_sequence=px.colors.qualitative.Pastel)
-        st.plotly_chart(fig_bar, use_container_width=True)
+        
+        try:
+            # Load the dedicated ML matrix dataset containing chunk_faithfulness
+            audit_df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'outputs', 'RAG_ML_Evaluation_Master.csv'))
+            
+            # Aggregate faithfulness scores across knowledge source files
+            source_faith = audit_df.groupby('source_type')['chunk_faithfulness'].mean().reset_index()
+            
+            # Generate the beautiful Plotly bar visual using the loaded matrix data
+            fig_bar = px.bar(
+                source_faith, 
+                x='source_type', 
+                y='chunk_faithfulness',
+                labels={'source_type': 'Source Category', 'chunk_faithfulness': 'Avg Faithfulness (0-1)'},
+                color='source_type', 
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        except Exception as e:
+            st.warning(f"Could not process semantic metrics bar chart: {e}")
 
     st.write("---")
 
     # 6. Advanced Scatter Plot Matrix: The Trust Gap
     st.subheader("The Trust Gap: System Confidence vs. Actual Faithfulness")
-    fig_scatter = px.scatter(df, x='confidence_score', y='chunk_faithfulness', 
-                             color='is_fallback', color_discrete_map={True: '#E63946', False: '#2E5A88'},
-                             hover_data=['final_query_clean'], size='chunk_char_count',
-                             labels={'confidence_score': 'AI Confidence (How the AI Felt)', 'chunk_faithfulness': 'ML Faithfulness (How Honest It Was)'})
-    # Add the Red Danger Zone Indicator Line matching notebook 6
-    fig_scatter.add_hline(y=0.3, line_dash="dash", line_color="red", annotation_text="Hallucination Risk Zone")
-    st.plotly_chart(fig_scatter, use_container_width=True)
+    
+    try:
+        # Utilize the rich audit dataframe for scatter mapping to avoid missing column errors on cloud
+        scatter_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'outputs', 'RAG_ML_Evaluation_Master.csv'))
+        
+        fig_scatter = px.scatter(
+            scatter_data, x='confidence_score', y='chunk_faithfulness', 
+            color='is_fallback', color_discrete_map={True: '#E63946', False: '#2E5A88'},
+            hover_data=['final_query_clean'], size='chunk_char_count',
+            labels={'confidence_score': 'AI Confidence (How the AI Felt)', 'chunk_faithfulness': 'ML Faithfulness (How Honest It Was)'}
+        )
+        fig_scatter.add_hline(y=0.3, line_dash="dash", line_color="red", annotation_text="Hallucination Risk Zone")
+        st.plotly_chart(fig_scatter, use_container_width=True)
+    except Exception as scatter_err:
+        st.warning(f"⚠️ Could not load advanced scatter tracking: {scatter_err}")
 
     st.write("---")
 
     # 7. Diagnostic Deep-Dive Data Viewer
     st.subheader("Production Diagnostic Engine: Failure Investigation Grid")
-    
-    # Filter grid to show failures requiring human attention
     failures_only = df[df['is_fallback'] == True][['final_query_clean', 'source_type', 'root_cause', 'llm_output']].drop_duplicates()
     
     if not failures_only.empty:
