@@ -66,24 +66,27 @@ tab1, tab2 = st.tabs(["📊 Executive KPIs", "🔬 Technical Deep-Dive"])
 with tab1:
     st.markdown("### Operational Performance Overview")
     
-    # Calculate live pipeline stats cleanly
-    total_queries = len(df_master)
+    # ✅ FIX: Drop duplicate queries to evaluate unique user interactions
+    df_unique_queries = df_master.drop_duplicates(subset=['final_query_clean'])
     
-    # 1. Count how many times the system actually hit a fallback (True)
-    fallback_count = int(df_master[df_master['is_fallback'] == True]['is_fallback'].count())
+    # Calculate live pipeline stats cleanly based on UNIQUE queries
+    total_queries = len(df_unique_queries)
     
-    # 2. Accuracy is the SUCCESS rate (Total minus failures)
+    # 1. Count how many unique queries hit a fallback
+    fallback_count = int(df_unique_queries[df_unique_queries['is_fallback'] == True]['is_fallback'].count())
+    
+    # 2. Accuracy is the SUCCESS rate of unique queries
     accuracy_rate = ((total_queries - fallback_count) / total_queries) * 100 if total_queries > 0 else 0.0
     
-    # 3. Average system confidence score
-    avg_confidence = df_master['confidence_score'].mean() * 100 if 'confidence_score' in df_master.columns else 0.0
+    # 3. Average system confidence score for unique queries
+    avg_confidence = df_unique_queries['confidence_score'].mean() * 100 if 'confidence_score' in df_unique_queries.columns else 0.0
     
     # Visual Metric Cards Row
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="Total Queries Audited", value=f"{total_queries}")
+        st.metric(label="Total Unique Queries", value=f"{total_queries}")
     with col2:
-        st.metric(label="RAG System Accuracy", value=f"{accuracy_rate:.2f}%") # This will now show 76.47%!
+        st.metric(label="RAG System Accuracy", value=f"{accuracy_rate:.2f}%")
     with col3:
         st.metric(label="Average System Confidence", value=f"{avg_confidence:.2f}%")
         
