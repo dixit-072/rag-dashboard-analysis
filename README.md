@@ -6,14 +6,14 @@ This project processes raw LLM/chatbot logs, engineers operational performance m
 
 ---
 
+# 📊 Automated RAG Production Pipeline Dashboard
+
 An interactive data analytics platform to audit live system reliability, semantic evaluation metrics, and LLM trust gaps in production RAG frameworks.
 
 ## 🚀 Live Web Application
-You can interact with the fully compiled pipeline analytics dashboard live on the web:
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dixit-rag-analytics.streamlit.app/)
-
-👉 **[Click here to open the Streamlit Dashboard](https://dixit-rag-analytics.streamlit.app/)**
+> ### 🖥️ **[Launch Live Streamlit Dashboard](https://dixit-rag-analytics.streamlit.app/)**
+> *Click the link above to explore the interactive visualizations, executive KPIs, and system diagnostic suites live on the web.*
 
 ---
 
