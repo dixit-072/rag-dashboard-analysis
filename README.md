@@ -58,11 +58,14 @@ This project transforms raw chatbot logs into actionable operational intelligenc
    [ Semantic Audit Metrics ] (src/audit.py)
               │
               ▼
-  [ Local MySQL Database Engine ] (src/export.py)
-        /                    \
-       ▼                      ▼
-[ Streamlit App ]      [ Power BI Dashboard ]
-   (app.py)             (Rag Dashboard.pbix)
+    [ Local MySQL Database ] ───► [ Export to CSV ] (src/export.py)
+              │                               │
+              ▼                               ▼
+     [ Power BI Dashboard ]        [ outputs/RAG_ML_Evaluation_Master.csv ]
+      (Rag Dashboard.pbix)                    │
+                                              ▼
+                                    [ Streamlit Cloud App ]
+                                          (app.py)
 
 ---
 
