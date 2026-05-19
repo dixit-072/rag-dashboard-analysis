@@ -7,7 +7,7 @@ This project processes raw LLM/chatbot logs, engineers operational performance m
 ---
 
 ## 🌐 Live Application
-👉 **[View Live Interactive Streamlit Dashboard](https://share.streamlit.io/dixit-072/rag-dashboard-analysis/main/app.py)** *(Deployed via Streamlit Cloud)*
+👉 [View Live Interactive Streamlit Dashboard](YOUR_ACTUAL_STREAMLIT_SHARE_URL) *(Deployed via Streamlit Cloud)*
 
 ---
 
