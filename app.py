@@ -53,8 +53,6 @@ def load_rag_data():
     
     return df
 
-# Initialize master dataframe
-df_master = load_rag_data()
 
 # Initialize master dataframe
 df_master = load_rag_data()
