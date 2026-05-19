@@ -18,34 +18,19 @@ st.title("Automated RAG Production Pipeline Dashboard")
 st.caption("Live system auditing, semantic evaluation, and diagnostic insights.")
 
 # ==========================================
-# 2. DATA INGESTION FROM MYSQL
+# 2. DATA INGESTION FROM REPOSITORY CSV
 # ==========================================
 @st.cache_data
 def load_rag_data():
-    # Resolve local or subfolder .env paths automatically
-    root_dir = Path().resolve()
-    possible_paths = [root_dir / ".env", root_dir / "notebooks" / ".env"]
-
-    for path in possible_paths:
-        if path.exists():
-            load_dotenv(dotenv_path=path)
-            break
-
-    user = os.getenv("DB_USER")
-    password = os.getenv("DB_PASSWORD")
-    host = os.getenv("DB_HOST", "localhost")
-    database = os.getenv("DB_NAME")
-    port = os.getenv("DB_PORT", "3306")
-    
-    if not user or not database:
-        st.error(" Configuration Error: Database credentials missing from your .env file!")
+    # Reads directly from your GitHub repository folder structure
+    try:
+        df = pd.read_csv("rag_master_logs.csv")
+    except FileNotFoundError:
+        st.error("🚨 Missing Data File: 'rag_master_logs.csv' was not found in your repository root folder.")
+        st.info("Please make sure you have exported your data table as a CSV file and pushed it to GitHub.")
         st.stop()
-        
-    engine = create_engine(f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}")
     
-    query = "SELECT * FROM power_bi"
-    df = pd.read_sql(query, con=engine)
-    
+    # Safe data type normalization
     if 'is_fallback' in df.columns:
         df['is_fallback'] = df['is_fallback'].astype(bool)
     else:
@@ -67,6 +52,9 @@ def load_rag_data():
         df['chunk_char_count'] = 0
     
     return df
+
+# Initialize master dataframe
+df_master = load_rag_data()
 
 # Initialize master dataframe
 df_master = load_rag_data()
