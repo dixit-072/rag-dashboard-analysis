@@ -22,12 +22,10 @@ st.caption("Live system auditing, semantic evaluation, and diagnostic insights."
 # ==========================================
 @st.cache_data
 def load_rag_data():
-    # Reads directly from your GitHub repository folder structure
     try:
-        df = pd.read_csv("rag_master_logs.csv")
+        df = pd.read_csv("outputs/RAG_ML_Evaluation_Master.csv")
     except FileNotFoundError:
-        st.error("🚨 Missing Data File: 'rag_master_logs.csv' was not found in your repository root folder.")
-        st.info("Please make sure you have exported your data table as a CSV file and pushed it to GitHub.")
+        st.error("🚨 Missing Data File: 'outputs/RAG_ML_Evaluation_Master.csv' was not found.")
         st.stop()
     
     # Safe data type normalization
