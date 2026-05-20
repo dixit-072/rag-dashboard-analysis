@@ -12,7 +12,7 @@ def run_pipeline():
     
     # STAGE 1: Ingest and align raw logs
     raw_data = load_and_merge_csvs()
-    
+
     # STAGE 2: Core Processing & Cleaning
     if raw_data is not None:
         cleaned_data = audit_and_clean_data(raw_data)

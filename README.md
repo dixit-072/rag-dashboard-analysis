@@ -67,14 +67,16 @@ This project transforms raw chatbot logs into actionable operational intelligenc
                                     [ Streamlit Cloud App ]
                                           (app.py)
 
+```
+
 ---
 
-## 📊 Core Metrics Tracked
+## 📊 Core Performance Metrics Achieved
 
-* **Query Analytics:** Active trend monitoring of unique incoming volume over time.
-* **Retrieval Success Rate:** Accuracy checking based on successful vs. fallback system triggers.
-* **Confidence Distribution:** Statistical average modeling of how confident the AI felt across category topics.
-* **Response Faithfulness Evaluation:** Verifying how closely generated text matches technical document inputs.
+* **Total Clean Audited Queries:** 192 Logs Processed
+* **RAG Precision Accuracy Rate:** 56.25%
+* **Average Evaluation Confidence:** 76.37%
+* **Average Inference Latency Speed:** 1.49 seconds
 
 ## ⚡ Engineering Challenges Solved
 

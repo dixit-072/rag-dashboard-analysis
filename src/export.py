@@ -1,45 +1,53 @@
-import pandas as pd
-from sqlalchemy import create_engine
 import os
+import pandas as pd
+import json
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
-def export_to_mysql(df, table_name="power_bi_evaluation"):
-    """
-    Connects to the local MySQL server and uploads the final 
-    processed evaluation data automatically.
-    """
-    print(f"Starting Stage 6: Exporting data to MySQL table '{table_name}'...")
-    
-    if df is None or df.empty:
-        print("No data available to export to MySQL.")
-        return False
+# Load variables from the .env file automatically
+load_dotenv()
 
-    # Credentials 
+def export_to_mysql(df, table_name="power_bi"):
+    # Grab configuration tokens safely
+    host = os.getenv("DB_HOST", "localhost")
+    port = os.getenv("DB_PORT")
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
-    host = os.getenv("DB_HOST")
-    port = os.getenv("DB_PORT")
-    database = os.getenv("DB_NAME")
-
+    db_name = os.getenv("DB_NAME")
+    
+    if not all([port, user, password, db_name]):
+        print(f"Connecting to MySQL database '{db_name}'...")
+        print("Database Export Failed: Missing credentials in environmental space.")
+        return False
+        
     try:
-        # Create the secure pipeline-to-database connection bridge
-        print(f"Connecting to MySQL database '{database}'...")
-        engine = create_engine(f'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}')
+        port = int(port) # Convert port string to integer
         
-        # Convert date column to string safely so MySQL doesn't alter its layout
+        # Create a copy to avoid altering the main runtime data frame
         df_export = df.copy()
-        if 'date' in df_export.columns:
-            df_export['date'] = df_export['date'].astype(str)
-
-        print("Streaming dataset rows straight to the SQL server...")
-        # Push the data. if_exists='replace' means it will automatically overwrite old records with fresh data!
-        df_export.to_sql(name=table_name, con=engine, if_exists='replace', index=False)
         
-        print(f"SUCCESS! Database table updated perfectly. Total rows uploaded: {len(df_export)}")
+        for col in df_export.columns:
+            # If the column contains elements that are lists or dictionaries, convert to strings
+            if df_export[col].apply(lambda x: isinstance(x, (dict, list))).any():
+                df_export[col] = df_export[col].apply(lambda x: json.dumps(x) if isinstance(x, (dict, list)) else str(x))
+        
+        print(f"Connecting to MySQL database '{db_name}' on {host}:{port}...")
+        
+        # Create secure engine connection
+        connection_string = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
+        engine = create_engine(connection_string)
+        
+        # Write data frame directly to MySQL database
+        df_export.to_sql(
+            name=table_name, 
+            con=engine, 
+            if_exists='replace',  # Overwrites old rows completely
+            index=False
+        )
+        
+        print(f"Success! Data successfully exported to MySQL table '{table_name}'.")
         return True
         
     except Exception as e:
-        print(f"Database Export Failed: {e}")
-        print("Tip: Make sure your MySQL Server workbench is turned on and running!")
+        print(f" Database Export Failed: {e}")
         return False
-    
-
